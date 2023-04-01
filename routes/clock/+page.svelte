@@ -12,33 +12,43 @@
       },
     ],
   } as Shift;
-  console.log(hour12);
-  Calendar.setHourlyPay(10.5);
+  Calendar.hourlyPay = 10.5;
   Calendar.setShiftPattern([[hour12, hour12, hour12, hour12, hour12, hour12, hour12]], new Date());
+  // @ts-expect-error - hidden method
+  Date.normalSpeed("10:36:41");
+
+  const getTime = () => ~~(Date.currentTime.getTime() / 1000) % Date.daySeconds;
+
+  const parseAngle = (ratio: number) => (360 - (ratio * 360 + 180)) % 360;
+
+  const setRootHue = (hue = parseAngle(Date.now() / Date.minuteMillis)) =>
+    document.documentElement.style.setProperty("--hue", `${Math.abs(hue) % 360}`);
+
   let earnings = Calendar.earningsNow();
 
-  let hours = Date.currentTime.getHours();
-  let minutes = Date.currentTime.getMinutes();
-  let seconds = Date.currentTime.getSeconds();
+  let currency = Calendar.currency;
 
-  const interval = setInterval(() => {
-    seconds = Date.currentTime.getSeconds();
-    minutes = Date.currentTime.getMinutes();
-    hours = Date.currentTime.getHours();
+  let time = getTime();
+  $: seconds = time % Date.minuteSeconds;
+  $: minutes = ~~(time / Date.minuteSeconds) % Date.hourMinutes;
+  $: hours = (~~(time / Date.hourSeconds) % Date.dayHours) /* adjust for zero-index */ + 1;
 
+  const fastInterval = setInterval(() => {
+    setRootHue();
+  }, 200);
+  const midInterval = setInterval(() => {
+    time = getTime();
     earnings = Calendar.earningsNow();
-
-    updateRoot();
   }, 500);
-
-  const parseAngle = (ratio: number) => 360 - (ratio * 360 + 180);
-
-  const updateRoot = (hue = parseAngle(seconds / 60)) =>
-    document.documentElement.style.setProperty("--hue", `${hue}`);
+  const slowInterval = setInterval(() => {
+    currency = Calendar.currency;
+  }, 1000);
 
   onDestroy(() => {
-    clearInterval(interval);
-    updateRoot(330);
+    clearInterval(fastInterval);
+    clearInterval(midInterval);
+    clearInterval(slowInterval);
+    setRootHue(330);
   });
 </script>
 
@@ -56,15 +66,13 @@
   </div>
 </div>
 <div class="pay">
-  <span class="currency">
-    {Calendar.currency}
-  </span>
+  <span class="currency">{currency}</span>
   <span class="count">
     <span class="whole">
       {earnings.toFixed(0)}
     </span>
     <span class="fraction">
-      {earnings.toFixed(Calendar.currencyPrecision).split(".")[1]}
+      {earnings.toFixed(Calendar.currencyPrecision).split(".")[1] ?? ""}
     </span>
   </span>
 </div>
@@ -126,15 +134,15 @@
         rotate(calc(90deg - var(--rotation)));
     }
     .hours {
-      --x-size: 23vmin;
+      --x-size: 18vmin;
       --y-size: 0.75vmin;
     }
     .minutes {
-      --x-size: 33vmin;
+      --x-size: 28vmin;
       --y-size: 0.5vmin;
     }
     .seconds {
-      --x-size: 43vmin;
+      --x-size: 38vmin;
       --y-size: 0.25vmin;
     }
     .digital {
