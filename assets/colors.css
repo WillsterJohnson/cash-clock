@@ -3,22 +3,22 @@
 }
 @media (prefers-color-scheme: light) {
   :root {
-    --background: lch(90% 30% var(--hue));
-    --background-elevated: lch(80% 30% var(--hue));
-    --foreground: lch(10% 30% var(--hue));
-    --background-50: lch(90% 30% var(--hue) / 0.5);
-    --background-elevated-50: lch(30% 30% var(--hue) / 0.5);
-    --foreground-50: lch(10% 30% var(--hue) / 0.5);
+    --background: lch(90% 30 var(--hue));
+    --background-elevated: lch(80% 30 var(--hue));
+    --foreground: lch(10% 30 var(--hue));
+    --background-50: lch(90% 30 var(--hue) / 0.5);
+    --background-elevated-50: lch(30% 30 var(--hue) / 0.5);
+    --foreground-50: lch(10% 30 var(--hue) / 0.5);
   }
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: lch(5% 30% var(--hue));
-    --background-elevated: lch(20% 30% var(--hue));
-    --foreground: lch(95% 30% var(--hue));
-    --background-50: lch(5% 30% var(--hue) / 0.5);
-    --background-elevated-50: lch(20% 30% var(--hue) / 0.5);
-    --foreground-50: lch(95% 30% var(--hue) / 0.5);
+    --background: lch(5% 30 var(--hue));
+    --background-elevated: lch(20% 30 var(--hue));
+    --foreground: lch(95% 30 var(--hue));
+    --background-50: lch(5% 30 var(--hue) / 0.5);
+    --background-elevated-50: lch(20% 30 var(--hue) / 0.5);
+    --foreground-50: lch(95% 30 var(--hue) / 0.5);
   }
 }
 body {
