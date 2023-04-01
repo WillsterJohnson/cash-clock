@@ -14,8 +14,6 @@
   } as Shift;
   Calendar.hourlyPay = 10.5;
   Calendar.setShiftPattern([[hour12, hour12, hour12, hour12, hour12, hour12, hour12]], new Date());
-  // @ts-expect-error - hidden method
-  Date.normalSpeed("10:36:41");
 
   const getTime = () => ~~(Date.currentTime.getTime() / 1000) % Date.daySeconds;
 
