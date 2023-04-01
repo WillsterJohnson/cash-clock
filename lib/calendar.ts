@@ -33,12 +33,19 @@ declare global {
      * Returns the current time
      */
     currentTime: Date;
+
+    dayHours: 24;
+    dayMinutes: 1_440;
     daySeconds: 86_400_000;
-    hourSeconds: 3_600;
-    minuteSeconds: 60;
     dayMillis: 86_400_000;
+
+    hourMinutes: 60;
+    hourSeconds: 3_600;
     hourMillis: 3_600_000;
+
+    minuteSeconds: 60;
     minuteMillis: 60_000;
+
     secondMillis: 1_000;
   }
   interface String {
@@ -72,12 +79,18 @@ Object.defineProperty(Date, "currentTime", {
     if (Date.setTime) return Date.setTime;
     return new Date();
   },
-  set: (value: Date | `${number}:${number}`) => {
+  set: (value: Date | `${number}:${number}${"" | `:${number}`}`) => {
     if (typeof value === "string") {
-      const [hours, minutes] = value.split(":").map((n) => parseInt(n));
+      const [hours, minutes, rawSeconds] = value.split(":").map((n) => parseInt(n));
       if (isNaN(hours) || isNaN(minutes)) throw new Error(`Invalid time: ${value}`);
+      const seconds = isNaN(rawSeconds) ? 0 : rawSeconds;
       // @ts-expect-error - hidden property
-      Date.setTime = new Date(Date.today().getTime() + hours * Date.hourMillis + minutes * 60_000);
+      Date.setTime = new Date(
+        Date.today().getTime() +
+          hours * Date.hourMillis +
+          minutes * Date.minuteMillis +
+          seconds * Date.secondMillis,
+      );
     }
     // @ts-expect-error - hidden property
     else Date.setTime = value;
@@ -110,13 +123,52 @@ Date.superSpeed = function (from?: `${number}:${number}`) {
     Date.currentTime = `${setHrs.toString().padStart(2, "0")}:${setMins
       .toString()
       .padStart(2, "0")}`;
-  }, 100);
+  }, 1000);
 };
+// @ts-expect-error - hidden property
+Date.normalSpeed = function (from?: `${number}:${number}`) {
+  // @ts-expect-error - hidden property
+  if (Date.interval) clearInterval(Date.interval);
+  if (!from) return;
+  // @ts-expect-error - hidden property
+  Date.currentTime = from;
+  // @ts-expect-error - hidden property
+  Date.interval = setInterval(() => {
+    const now = Date.currentTime;
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    let setSecs;
+    let setMins;
+    let setHrs;
+    if (seconds === 59) {
+      setSecs = 0;
+      if (minutes === 59) {
+        setMins = 0;
+        setHrs = hours + 1;
+      } else {
+        setMins = minutes + 1;
+        setHrs = hours;
+      }
+    } else {
+      setSecs = seconds + 1;
+      setMins = minutes;
+      setHrs = hours;
+    }
+    // @ts-expect-error - hidden property
+    Date.currentTime = `${setHrs.toString().padStart(2, "0")}:${setMins
+      .toString()
+      .padStart(2, "0")}:${setSecs.toString().padStart(2, "0")}`;
+  }, 1000);
+};
+Date.dayHours = 24;
+Date.dayMinutes = 1_440;
 Date.daySeconds = 86_400_000;
-Date.hourSeconds = 3_600;
-Date.minuteSeconds = 60;
 Date.dayMillis = 86_400_000;
+Date.hourMinutes = 60;
+Date.hourSeconds = 3_600;
 Date.hourMillis = 3_600_000;
+Date.minuteSeconds = 60;
 Date.minuteMillis = 60_000;
 Date.secondMillis = 1_000;
 String.prototype.toDate = function () {
@@ -189,11 +241,12 @@ export interface ShiftPattern<DateForm extends Date | string = Date> {
   oneOffs: DayData<DateForm>[];
   startDates: DateForm[];
 }
+export interface Currency {
+  symbol: "$" | "£" | "€" | "¥" | "₹";
+  precision: number;
+}
 export interface CalendarData<DateForm extends Date | string = Date> {
-  currency: {
-    symbol: "$" | "£" | "€" | "¥" | "₹";
-    precision: number;
-  };
+  currency: Currency;
   hourlyPay: number;
   days: DayData<DateForm>[] | ShiftPattern<DateForm>;
   alreadyWorked: Record<number, Shift>;
@@ -351,7 +404,14 @@ class CalendarClass {
         end: new Date(0, 0, 1, +unpaid.end.split(":")[0], +unpaid.end.split(":")[1]),
       };
     });
-    const nowTime = new Date(0, 0, 1, Date.currentTime.getHours(), Date.currentTime.getMinutes());
+    const nowTime = new Date(
+      0,
+      0,
+      1,
+      Date.currentTime.getHours(),
+      Date.currentTime.getMinutes(),
+      Date.currentTime.getSeconds(),
+    );
 
     // shift not yet started
     if (startTime.isAfter(nowTime)) return 0;
@@ -385,9 +445,12 @@ class CalendarClass {
     return actual;
   }
 
-  public setHourlyPay(pay: number) {
+  public set hourlyPay(pay: number) {
     this.storedData.hourlyPay = pay;
     this.save();
+  }
+  public get hourlyPay() {
+    return this.storedData.hourlyPay;
   }
 
   public get currency() {
@@ -395,6 +458,11 @@ class CalendarClass {
   }
   public get currencyPrecision() {
     return this.storedData.currency.precision;
+  }
+
+  public set fullCurrency(currency: Currency) {
+    this.storedData.currency = currency;
+    this.save();
   }
 }
 
