@@ -29,7 +29,7 @@
   let time = getTime();
   $: seconds = time % Date.minuteSeconds;
   $: minutes = ~~(time / Date.minuteSeconds) % Date.hourMinutes;
-  $: hours = (~~(time / Date.hourSeconds) % Date.dayHours) /* adjust for zero-index */ + 1;
+  $: hours = (~~(time / Date.hourSeconds) % Date.dayHours) /*adjust for zero-index*/ + 1;
 
   const fastInterval = setInterval(() => {
     setRootHue();
