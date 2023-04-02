@@ -1,28 +1,44 @@
 :root {
   --hue: 330;
+  --colorful: lch(50% 90 var(--hue));
+  --colorful-50: lch(50% 90 var(--hue) / 0.5);
 }
 @media (prefers-color-scheme: light) {
   :root {
     --background: lch(90% 30 var(--hue));
+    --background-dropped: lch(95% 30 var(--hue));
     --background-elevated: lch(80% 30 var(--hue));
     --foreground: lch(10% 30 var(--hue));
+    --foreground-dropped: lch(25% 30 var(--hue));
+    --foreground-elevated: lch(5% 30 var(--hue));
+
     --background-50: lch(90% 30 var(--hue) / 0.5);
+    --background-dropped-50: lch(95% 30 var(--hue) / 0.5);
     --background-elevated-50: lch(30% 30 var(--hue) / 0.5);
     --foreground-50: lch(10% 30 var(--hue) / 0.5);
+    --foreground-dropped-50: lch(25% 30 var(--hue) / 0.5);
+    --foreground-elevated-50: lch(5% 30 var(--hue) / 0.5);
   }
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: lch(5% 30 var(--hue));
+    --background: lch(10% 30 var(--hue));
+    --background-dropped: lch(5% 30 var(--hue));
     --background-elevated: lch(20% 30 var(--hue));
-    --foreground: lch(95% 30 var(--hue));
-    --background-50: lch(5% 30 var(--hue) / 0.5);
+    --foreground: lch(70% 30 var(--hue));
+    --foreground-dropped: lch(55% 30 var(--hue));
+    --foreground-elevated: lch(99% 30 var(--hue));
+
+    --background-50: lch(10% 30 var(--hue) / 0.5);
+    --background-dropped-50: lch(5% 30 var(--hue) / 0.5);
     --background-elevated-50: lch(20% 30 var(--hue) / 0.5);
-    --foreground-50: lch(95% 30 var(--hue) / 0.5);
+    --foreground-50: lch(70% 30 var(--hue) / 0.5);
+    --foreground-dropped-50: lch(55% 30 var(--hue) / 0.5);
+    --foreground-elevated-50: lch(99% 30 var(--hue) / 0.5);
   }
 }
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--background-dropped);
+  color: var(--foreground-elevated);
   font-family: sans-serif;
 }

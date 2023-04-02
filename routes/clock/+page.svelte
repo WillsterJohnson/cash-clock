@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { autoRepeat } from "$lib/autoRepeat.js";
   import { Calendar, type Shift } from "$lib/calendar.js";
   import { onDestroy } from "svelte";
 
@@ -15,7 +16,8 @@
   Calendar.hourlyPay = 10.5;
   Calendar.setShiftPattern([[hour12, hour12, hour12, hour12, hour12, hour12, hour12]], new Date());
 
-  const getTime = () => ~~(Date.currentTime.getTime() / 1000) % Date.daySeconds;
+  const getTimeSeconds = () => ~~(Date.currentTime.getTime() / 1000) % Date.daySeconds;
+  const getTimeMillis = () => Date.currentTime.getTime() % Date.dayMillis;
 
   const parseAngle = (ratio: number) => (360 - (ratio * 360 + 180)) % 360;
 
@@ -26,16 +28,19 @@
 
   let currency = Calendar.currency;
 
-  let time = getTime();
-  $: seconds = time % Date.minuteSeconds;
+  let time = getTimeSeconds();
+  let seconds = (getTimeMillis() / 1000) % Date.minuteSeconds;
   $: minutes = ~~(time / Date.minuteSeconds) % Date.hourMinutes;
   $: hours = (~~(time / Date.hourSeconds) % Date.dayHours) /*adjust for zero-index*/ + 1;
 
-  const fastInterval = setInterval(() => {
+  const fastInterval = autoRepeat(() => {
     setRootHue();
-  }, 200);
+    seconds = (getTimeMillis() / 1000) % Date.minuteSeconds;
+  }, 75);
+  fastInterval.run();
+
   const midInterval = setInterval(() => {
-    time = getTime();
+    time = getTimeSeconds();
     earnings = Calendar.earningsNow();
   }, 500);
   const slowInterval = setInterval(() => {
@@ -43,7 +48,7 @@
   }, 1000);
 
   onDestroy(() => {
-    clearInterval(fastInterval);
+    fastInterval.active = false;
     clearInterval(midInterval);
     clearInterval(slowInterval);
     setRootHue(330);
@@ -51,13 +56,13 @@
 </script>
 
 <div class="clockface">
-  <div class="majorhour" />
-  <div class="majorhour" />
-  <div class="majorhour" />
-  <div class="majorhour" />
+  {#each Array(12) as _}
+    <div class="majorhour" />
+  {/each}
   <div style="--rotation:{parseAngle(hours / 12)}deg" class="hours" />
   <div style="--rotation:{parseAngle(minutes / 60)}deg" class="minutes" />
   <div style="--rotation:{parseAngle(seconds / 60)}deg" class="seconds" />
+  <div class="center" />
   <div class="digital">
     <span>{hours.toString().padStart(2, "0")}</span>
     <span>{minutes.toString().padStart(2, "0")}</span>
@@ -76,6 +81,8 @@
 </div>
 
 <style lang="scss">
+  @use "sass:math";
+
   .clockface {
     position: absolute;
     top: 50%;
@@ -90,9 +97,9 @@
     .majorhour,
     .hours,
     .minutes,
-    .seconds {
+    .seconds,
+    .center {
       position: absolute;
-      background: var(--foreground);
       border-radius: 100vmin;
       width: var(--x-size);
       height: var(--y-size);
@@ -100,63 +107,72 @@
       top: calc((90vmin - var(--y-size)) / 2);
     }
     .majorhour {
-      --x-size: 0.5vmin;
-      --y-size: 7vmin;
+      --x-size: 0.2vmin;
+      --y-size: 2vmin;
+      background: var(--foreground-elevated);
       transform-origin: 50% 50%;
-      @for $i from 1 through 4 {
-        &:nth-child(#{$i}) {
-          @if ($i - 1) % 2 == 0 {
-            transform: translate(
-                calc(cos(#{$i * 90}deg) * (45vmin - var(--x-size))),
-                calc(sin(#{$i * 90}deg) * (45vmin - var(--y-size)))
-              )
-              rotate(0deg);
-          } @else {
-            transform: translate(
-                calc(cos(#{$i * 90}deg) * (45vmin - var(--y-size))),
-                calc(sin(#{$i * 90}deg) * (45vmin - var(--x-size)))
-              )
-              rotate(90deg);
-          }
+      @for $i from 1 through 12 {
+        &:nth-of-type(#{$i}) {
+          transform: translate(
+              calc(cos(#{math.div($i * 360, 12)}deg) * (45vmin - var(--y-size) - 1vmin)),
+              calc(sin(#{math.div($i * 360, 12)}deg) * (45vmin - var(--y-size) - 1vmin))
+            )
+            rotate(#{math.div(($i + 3) * 360, 12)}deg);
         }
       }
     }
     .hours,
     .minutes,
     .seconds {
-      box-shadow: 0 0 1vmin var(--background);
+      box-shadow: 0 0 0.5vmin var(--background);
       transform: translate(
-          calc(sin(var(--rotation)) * (max(var(--x-size), var(--y-size)) / 2)),
-          calc(cos(var(--rotation)) * (max(var(--x-size), var(--y-size)) / 2))
+          calc(sin(var(--rotation)) * (var(--x-size) / 2)),
+          calc(cos(var(--rotation)) * (var(--x-size) / 2))
         )
         rotate(calc(90deg - var(--rotation)));
     }
     .hours {
-      --x-size: 18vmin;
-      --y-size: 0.75vmin;
+      --x-size: 26vmin;
+      --y-size: 5vmin;
+      background: var(--foreground);
     }
     .minutes {
-      --x-size: 28vmin;
-      --y-size: 0.5vmin;
+      --x-size: 39vmin;
+      --y-size: 1vmin;
+      background: var(--foreground-elevated);
     }
     .seconds {
-      --x-size: 38vmin;
-      --y-size: 0.25vmin;
+      --x-size: 41vmin;
+      --y-size: 0.2vmin;
+      background: var(--colorful);
+    }
+    .center {
+      --x-size: 2vmin;
+      --y-size: 2vmin;
+      background: var(--colorful);
     }
     .digital {
       position: absolute;
-      top: 42vmin;
-      left: 64vmin;
-      font-size: 4vmin;
+      --font-size: 5vmin;
+      font-size: var(--font-size);
+      top: calc(45vmin - var(--font-size) - 2vmin);
+      left: calc(80vmin - var(--font-size) - 1vmin);
+      border-radius: 100vmin;
+      overflow: hidden;
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: -1;
       span {
-        margin-inline: 0.5vmin;
-        padding: 0.5vmin;
+        padding-inline: 1vmin;
         background: var(--background);
+        &:first-child {
+          padding-block-start: 1.5vmin;
+        }
+        &:last-child {
+          padding-block-end: 1.5vmin;
+        }
       }
     }
   }
@@ -165,15 +181,18 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(1.8);
-    padding: 5vmin;
+    padding-block-start: 1.5vmin;
+    padding-block-end: 1.75vmin;
+    padding-inline: 2.5vmin;
+    background: var(--background-dropped-50);
+    border-radius: 100vmin;
     overflow: hidden;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    text-shadow: 0 0 1vmin var(--background);
     .currency {
-      font-size: 7vmin;
+      font-size: 6vmin;
     }
     .count {
       display: flex;
