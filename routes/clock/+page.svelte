@@ -25,6 +25,7 @@
     document.documentElement.style.setProperty("--hue", `${Math.abs(hue) % 360}`);
 
   let earnings = Calendar.earningsNow();
+  $: procEarnings = earnings instanceof Error ? 0 : earnings;
 
   let currency = Calendar.currency;
 
@@ -72,10 +73,10 @@
   <span class="currency">{currency}</span>
   <span class="count">
     <span class="whole">
-      {earnings.toFixed(0)}
+      {procEarnings.toFixed(0)}
     </span>
     <span class="fraction">
-      {earnings.toFixed(Calendar.currencyPrecision).split(".")[1] ?? ""}
+      {procEarnings.toFixed(Calendar.currencyPrecision).split(".")[1] ?? ""}
     </span>
   </span>
 </div>

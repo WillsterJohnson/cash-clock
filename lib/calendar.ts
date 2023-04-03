@@ -82,7 +82,7 @@ Object.defineProperty(Date, "currentTime", {
   set: (value: Date | `${number}:${number}${"" | `:${number}`}`) => {
     if (typeof value === "string") {
       const [hours, minutes, rawSeconds] = value.split(":").map((n) => parseInt(n));
-      if (isNaN(hours) || isNaN(minutes)) throw new Error(`Invalid time: ${value}`);
+      if (isNaN(hours) || isNaN(minutes)) return new Error(`Invalid time: ${value}`);
       const seconds = isNaN(rawSeconds) ? 0 : rawSeconds;
       // @ts-expect-error - hidden property
       Date.setTime = new Date(
@@ -313,7 +313,7 @@ class CalendarClass {
         const key = lastDayChecked.getTime();
 
         if (oneOff) parsed.alreadyWorked[key] = oneOff;
-        else if (dayInfo) parsed.alreadyWorked[key] = dayInfo;
+        else if (dayInfo && !(dayInfo instanceof Error)) parsed.alreadyWorked[key] = dayInfo;
         else parsed.alreadyWorked[key] = { start: null, end: null, scheduledUnpaid: [] };
       }
     }
@@ -339,13 +339,13 @@ class CalendarClass {
   // PRIVATE API
   private getShiftForDay(day: Date, useShiftPattern?: ShiftPattern) {
     const shiftPattern = useShiftPattern ?? this.storedData.days;
-    if (Array.isArray(shiftPattern)) throw new Error("Cannot get shift for day in non-pattern");
+    if (Array.isArray(shiftPattern)) return new Error("Cannot get shift for day in non-pattern");
     const { pattern, startDates } = shiftPattern;
     const weekZero = startDates
-      .filter((day) => Date.today().isAfter(day))
+      .filter((sDay) => day.isAfter(sDay) || day.asDay().getTime() === sDay.asDay().getTime())
       .reduce<Date>((max, cur) => (max.isAfter(cur) ? max : cur), new Date(0, 0, 1));
     const dayOffset = (day.getTime() - weekZero.getTime()) / Date.dayMillis;
-    return pattern[~~(dayOffset / 7)][~~(dayOffset % 7)];
+    return pattern[~~(dayOffset / 7)]?.[~~(dayOffset % 7)];
   }
 
   private createShiftPatternDays(pattern: PatternDays, startDate: Date) {
@@ -383,18 +383,19 @@ class CalendarClass {
 
   public earningsNow() {
     const { hourlyPay, days } = this.storedData;
-    if (isNaN(hourlyPay)) throw new Error("No hourly pay set");
+    if (isNaN(hourlyPay)) return new Error("No hourly pay set");
 
-    let todaysShift: Shift;
+    let todaysShift: Shift | Error;
 
     if (Array.isArray(days)) {
       const today = Date.today();
       todaysShift = days.find((day) => day.date.asDay() === today)!;
     } else todaysShift = this.getShiftForDay(Date.today())!;
-    if (!todaysShift) throw new Error("No shift for today");
+    if (!todaysShift || todaysShift instanceof Error)
+      return new Error("No shift for today", { cause: todaysShift });
 
     const { start, end, scheduledUnpaid } = todaysShift;
-    if (!start || !end) throw new Error("No shift for today");
+    if (!start || !end) return new Error("No shift times for today");
 
     const startTime = new Date(0, 0, 1, +start.split(":")[0], +start.split(":")[1]);
     const endTime = new Date(0, 0, 1, +end.split(":")[0], +end.split(":")[1]);
