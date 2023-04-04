@@ -1,0 +1,43 @@
+{
+  "packageId": "com.willsterjohnson.cash_clock.twa",
+  "host": "cash-clock.willsterjohnson.com",
+  "name": "Cash Clock",
+  "launcherName": "Cash Clock",
+  "display": "fullscreen",
+  "themeColor": "#888888",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#888888",
+  "enableNotifications": true,
+  "startUrl": "/?source=pwa",
+  "iconUrl": "https://cash-clock.willsterjohnson.com/favicon.svg",
+  "maskableIconUrl": "https://cash-clock.willsterjohnson.com/favicon.svg",
+  "monochromeIconUrl": "https://cash-clock.willsterjohnson.com/favicon.svg",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "/media/will/NVMe250/Projects/pay-clock/bubblewrapped/android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://cash-clock.willsterjohnson.com/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://cash-clock.willsterjohnson.com/",
+  "minSdkVersion": 19,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "appVersion": "1"
+}

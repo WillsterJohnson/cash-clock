@@ -9,3 +9,6 @@ node_modules
 !.env.example
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+bubblewrapped/app-release*.*
+bubblewrapped/.gradle
+bubblewrapped/app/build
