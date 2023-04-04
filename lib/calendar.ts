@@ -24,6 +24,10 @@ declare global {
      */
     isAfter(date: Date): boolean;
   }
+
+  interface Number {
+    toString(): `${number}`;
+  }
   interface DateConstructor {
     /**
      * Returns today's date at 00:00:00.000
@@ -291,7 +295,8 @@ class CalendarClass {
   private updateShiftPattern(parsed: CalendarData) {
     if (Array.isArray(parsed.days)) return;
     const { pattern, startDates } = parsed.days;
-    const [startDate] = startDates.filter((date) => Date.today().isAfter(date));
+    const filtered = startDates.filter((date) => Date.today().isAfter(date));
+    const startDate = filtered[filtered.length - 1];
     parsed.days = this.createShiftPatternDays(pattern, startDate);
   }
 
@@ -337,9 +342,19 @@ class CalendarClass {
   }
 
   // PRIVATE API
-  private getShiftForDay(day: Date, useShiftPattern?: ShiftPattern) {
+  private createShiftPatternDays(pattern: PatternDays, startDate: Date) {
+    const startDates = [startDate.asDay().offsetDays(-7 * pattern.length), startDate.asDay()];
+    // create a year's worth of week Zero day zero dates
+    while (startDates.length < 52 / pattern.length)
+      startDates.push(startDates[startDates.length - 1].offsetDays(7 * pattern.length));
+    return { pattern, startDates, oneOffs: [] };
+  }
+  // PUBLIC API
+  public getShiftForDay(day: Date, useShiftPattern?: ShiftPattern) {
     const shiftPattern = useShiftPattern ?? this.storedData.days;
-    if (Array.isArray(shiftPattern)) return new Error("Cannot get shift for day in non-pattern");
+    if (Array.isArray(shiftPattern)) {
+      return shiftPattern.find((cur) => cur.date.asDay() === day) ?? null;
+    }
     const { pattern, startDates } = shiftPattern;
     const weekZero = startDates
       .filter((sDay) => day.isAfter(sDay) || day.asDay().getTime() === sDay.asDay().getTime())
@@ -347,16 +362,6 @@ class CalendarClass {
     const dayOffset = (day.getTime() - weekZero.getTime()) / Date.dayMillis;
     return pattern[~~(dayOffset / 7)]?.[~~(dayOffset % 7)];
   }
-
-  private createShiftPatternDays(pattern: PatternDays, startDate: Date) {
-    const startDates = [startDate.asDay().offsetDays(-7 * pattern.length), startDate.asDay()];
-    // create a year's worth of week Zero day zero dates
-    while (startDates.length < 52 / pattern.length)
-      startDates.push(startDates[startDates.length - 1].offsetDays(7 * pattern.length));
-
-    return { pattern, startDates, oneOffs: [] };
-  }
-  // PUBLIC API
 
   public setShiftPattern(pattern: PatternDays, startDate: Date) {
     this.storedData.days = this.createShiftPatternDays(pattern, startDate);
@@ -382,15 +387,10 @@ class CalendarClass {
   }
 
   public earningsNow() {
-    const { hourlyPay, days } = this.storedData;
+    const { hourlyPay } = this.storedData;
     if (isNaN(hourlyPay)) return new Error("No hourly pay set");
 
-    let todaysShift: Shift | Error;
-
-    if (Array.isArray(days)) {
-      const today = Date.today();
-      todaysShift = days.find((day) => day.date.asDay() === today)!;
-    } else todaysShift = this.getShiftForDay(Date.today())!;
+    let todaysShift = this.getShiftForDay(Date.today())!;
     if (!todaysShift || todaysShift instanceof Error)
       return new Error("No shift for today", { cause: todaysShift });
 

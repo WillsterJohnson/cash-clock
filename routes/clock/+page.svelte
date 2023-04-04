@@ -51,38 +51,46 @@
   });
 </script>
 
-<div class="clockface">
-  {#each Array(12) as _}
-    <div class="majorhour" />
-  {/each}
-  <div style="--rotation:{parseAngle(hours / 12)}deg" class="hours" />
-  <div style="--rotation:{parseAngle(minutes / 60)}deg" class="minutes" />
-  <div style="--rotation:{parseAngle(seconds / 60)}deg" class="seconds" />
-  <div class="center" />
-  <div class="digital">
-    <span>{hours.toString().padStart(2, "0")}</span>
-    <span>{minutes.toString().padStart(2, "0")}</span>
+<div class="wrapper">
+  <div class="clockface">
+    {#each Array(12) as _}
+      <div class="majorhour" />
+    {/each}
+    <div style="--rotation:{parseAngle(hours / 12)}deg" class="hours" />
+    <div style="--rotation:{parseAngle(minutes / 60)}deg" class="minutes" />
+    <div style="--rotation:{parseAngle(seconds / 60)}deg" class="seconds" />
+    <div class="center" />
+    <div class="digital">
+      <span>{hours.toString().padStart(2, "0")}</span>
+      <span>{minutes.toString().padStart(2, "0")}</span>
+    </div>
   </div>
-</div>
-<div class="pay">
-  <span class="currency">{currency}</span>
-  <span class="count">
-    <span class="whole">
-      {procEarnings.toFixed(0)}
+  <div class="pay">
+    <span class="currency">{currency}</span>
+    <span class="count">
+      <span class="whole">
+        {procEarnings.toFixed(0)}
+      </span>
+      <span class="fraction">
+        {procEarnings.toFixed(Calendar.currencyPrecision).split(".")[1] ?? ""}
+      </span>
     </span>
-    <span class="fraction">
-      {procEarnings.toFixed(Calendar.currencyPrecision).split(".")[1] ?? ""}
-    </span>
-  </span>
+  </div>
 </div>
 
 <style lang="scss">
   @use "sass:math";
 
+  .wrapper {
+    width: 90vmin;
+    height: 90vmin;
+    position: relative;
+  }
   .clockface {
     border-radius: 90vmin;
+    width: 90vmin;
+    height: 90vmin;
     background: var(--background-elevated);
-    height: 100%;
 
     .majorhour,
     .hours,

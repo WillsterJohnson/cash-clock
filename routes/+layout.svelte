@@ -55,12 +55,26 @@
 </div>
 
 {#key data.pathname}
-  <div class="page-wrap" in:fade={{ duration: 300, delay: 350 }} out:fade={{ duration: 300 }}>
-    <slot />
+  <div class="width-limit" in:fade={{ duration: 300, delay: 350 }} out:fade={{ duration: 300 }}>
+    <div class="page-wrap">
+      <slot />
+    </div>
   </div>
 {/key}
 
 <style lang="scss">
+  :global(body) {
+    overflow: hidden;
+  }
+  .width-limit {
+    max-width: max(90vmin, 120vh);
+    height: 100%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
   .settings-toggle,
   .clock-calendar-toggle {
     position: absolute;
@@ -83,16 +97,24 @@
   }
 
   .settings-wrap {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 150;
   }
 
   .page-wrap {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: relative;
+    margin: auto;
     width: 90vmin;
-    aspect-ratio: 1;
+    height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    > :global(*) {
+      width: 100%;
+    }
   }
 </style>

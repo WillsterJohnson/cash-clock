@@ -1,60 +1,59 @@
 <script lang="ts">
   import CalendarUI from "$lib/Calendar.svelte";
   let year = Date.currentTime.getFullYear();
-  let month: number | `${number}` = Date.currentTime.getMonth();
+  let month: `${number}` = (Date.currentTime.getMonth() + 1).toString();
 
   const nextMonth = () => {
     if (+month === 12) {
-      month = 1;
+      month = "1";
       year++;
-    } else month = +month + 1;
+    } else month = (+month + 1).toString();
   };
   const lastMonth = () => {
     if (+month === 1) {
-      month = 12;
+      month = "12";
       year--;
-    } else month = +month - 1;
+    } else month = (+month - 1).toString();
   };
 </script>
 
-<CalendarUI bind:year bind:month />
-
 <div class="calendar">
   <div class="options">
-    <button class="nav left" on:click={lastMonth}>
-      <span data-sr-only>Previous Month</span>
+    <button class="nav left" on:click={lastMonth} aria-label="Previous Month">
       <span class="icon">navigate_before</span>
     </button>
 
-    <button class="nav right" on:click={nextMonth}>
-      <span data-sr-only>Next Month</span>
+    <div class="selector">
+      <div class="month">
+        <label for="month" data-sr-only>Month</label>
+        <select name="month" bind:value={month}>
+          <option value="1">Jan</option>
+          <option value="2">Feb</option>
+          <option value="3">Mar</option>
+          <option value="4">Apr</option>
+          <option value="5">May</option>
+          <option value="6">Jun</option>
+          <option value="7">Jul</option>
+          <option value="8">Aug</option>
+          <option value="9">Sep</option>
+          <option value="10">Oct</option>
+          <option value="11">Nov</option>
+          <option value="12">Dec</option>
+        </select>
+      </div>
+      <div class="year">
+        <label for="year" data-sr-only>Year</label>
+        <input type="number" name="year" min="2000" max="3000" bind:value={year} />
+      </div>
+    </div>
+
+    <button class="nav right" on:click={nextMonth} aria-label="Next Month">
       <span class="icon">navigate_next</span>
     </button>
-
-    <div class="selector month">
-      <label for="month" data-sr-only>Month</label>
-      <select name="month" bind:value={month}>
-        <option value="1">Jan</option>
-        <option value="2">Feb</option>
-        <option value="3">Mar</option>
-        <option value="4">Apr</option>
-        <option value="5">May</option>
-        <option value="6">Jun</option>
-        <option value="7">Jul</option>
-        <option value="8">Aug</option>
-        <option value="9">Sep</option>
-        <option value="10">Oct</option>
-        <option value="11">Nov</option>
-        <option value="12">Dec</option>
-      </select>
-    </div>
-
-    <div class="selector year">
-      <label for="year" data-sr-only>Year</label>
-      <input type="number" name="year" min="2000" max="3000" bind:value={year} />
-    </div>
   </div>
 </div>
+
+<CalendarUI bind:year bind:month />
 
 <style lang="scss">
   input,
@@ -64,31 +63,49 @@
     margin: 0;
     color: inherit;
     font: inherit;
-    font-size: 5vmin;
     padding: 1vmin;
-    border-radius: 2vmin;
     background: var(--background-elevated);
+    cursor: pointer;
   }
   input,
   select {
+    font-size: 5vmin;
     height: 10vmin;
-    width: 20vmin;
   }
-  input[type="number"] {
+  input {
+    width: 15vmin;
     appearance: textfield;
   }
-
-  .calendar {
-    position: relative;
+  select {
+    width: 15vmin;
   }
-  .nav {
-    position: absolute;
-    top: 0;
-    &.left {
-      left: 0;
+  button {
+    border-radius: 100vmin;
+    aspect-ratio: 1/1;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    margin: auto;
+    width: 80%;
+  }
+
+  .selector {
+    display: flex;
+    flex-direction: row;
+    > * {
+      overflow: hidden;
     }
-    &.right {
-      right: 0;
+    .year {
+      border-top-right-radius: 2vmin;
+      border-bottom-right-radius: 2vmin;
+    }
+    .month {
+      border-top-left-radius: 2vmin;
+      border-bottom-left-radius: 2vmin;
     }
   }
 </style>
