@@ -343,7 +343,10 @@ class CalendarClass {
 
   // PRIVATE API
   private createShiftPatternDays(pattern: PatternDays, startDate: Date) {
-    const startDates = [startDate.asDay().offsetDays(-7 * pattern.length), startDate.asDay()];
+    const startDates = [] as Date[];
+    if (startDate.asDay().getTime() === Date.today().getTime())
+      startDates.push(startDate.asDay().offsetDays(-7 * pattern.length));
+    startDates.push(startDate.asDay());
     // create a year's worth of week Zero day zero dates
     while (startDates.length < 52 / pattern.length)
       startDates.push(startDates[startDates.length - 1].offsetDays(7 * pattern.length));
