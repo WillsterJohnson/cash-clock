@@ -3,12 +3,12 @@
   import ShiftInfo from "./ShiftInfo.svelte";
 
   export let empty: boolean = false;
-  export let today: boolean = false;
   export let dayNumber: number;
   export let weekday: number;
   export let weeknumber: number;
   export let date: Date;
 
+  $: today = date.asDay().getTime() === Date.today().getTime();
   $: shift = Calendar.getShiftForDay(date);
 </script>
 
