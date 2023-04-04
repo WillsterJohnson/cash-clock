@@ -4,12 +4,12 @@
 
   export let empty: boolean = false;
   export let dayNumber: number;
-  export let weekday: number;
   export let weeknumber: number;
   export let year: number;
   export let month: number;
 
   $: date = new Date(year, month, dayNumber);
+  $: weekday = date.getDay() === 0 ? 7 : date.getDay();
   $: today = date.asDay().getTime() === Date.today().getTime();
   $: shift = Calendar.getShiftForDay(date);
 </script>
@@ -38,7 +38,7 @@
     &:is(div) {
       color: var(--foreground-elevated-50);
     }
-    &:not([data-weekday="0"]) {
+    &:not([data-weekday="1"]) {
       border-left: 1px solid var(--foreground-elevated);
     }
     &:is(button) {
@@ -50,7 +50,7 @@
       font: inherit;
       border: none;
       border-top: 1px solid var(--foreground-elevated);
-      &:not([data-weekday="0"]) {
+      &:not([data-weekday="1"]) {
         border-left: 1px solid var(--foreground-elevated);
       }
       &:is(:hover, :focus-within) {

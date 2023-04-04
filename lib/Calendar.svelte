@@ -46,7 +46,6 @@
     <Day
       empty
       dayNumber={daysInMonth(+month - 1) - (dayOfWeekFirstOfMonth - (i + 2))}
-      weekday={i}
       weeknumber={0}
       {year}
       month={+month - 2}
@@ -56,7 +55,6 @@
   {#each Array.from({ length: monthLength }) as _, i}
     <Day
       dayNumber={i + 1}
-      weekday={((i + (dayOfWeekFirstOfMonth - 1)) % 7) + 1}
       weeknumber={Math.floor((i + (dayOfWeekFirstOfMonth - 1)) / 7)}
       {year}
       month={+month - 1}
@@ -64,7 +62,7 @@
   {/each}
 
   {#each Array.from({ length: 6 - ((dayOfWeekFirstOfMonth - 1 + monthLength - 1) % 7) }) as _, i}
-    <Day empty dayNumber={i + 1} weekday={i + 1} weeknumber={5} {year} month={+month} />
+    <Day empty dayNumber={i + 1} weeknumber={5} {year} month={+month} />
   {/each}
 </div>
 
