@@ -55,16 +55,16 @@
   {#each Array(12) as _}
     <div class="majorhour" />
   {/each}
-  <div style="/*display:none;*/--rotation:{parseAngle(hours / 12)}deg" class="hours" />
-  <div style="/*display:none;*/--rotation:{parseAngle(minutes / 60)}deg" class="minutes" />
-  <div style="/*display:none;*/--rotation:{parseAngle(seconds / 60)}deg" class="seconds" />
-  <div class="center" style="/*display:none;*/" />
+  <div style="--rotation:{parseAngle(hours / 12)}deg" class="hours" />
+  <div style="--rotation:{parseAngle(minutes / 60)}deg" class="minutes" />
+  <div style="--rotation:{parseAngle(seconds / 60)}deg" class="seconds" />
+  <div class="center" />
   <div class="digital">
     <span>{hours.toString().padStart(2, "0")}</span>
     <span>{minutes.toString().padStart(2, "0")}</span>
   </div>
 </div>
-<div style="display:none" class="pay">
+<div class="pay">
   <span class="currency">{currency}</span>
   <span class="count">
     <span class="whole">
