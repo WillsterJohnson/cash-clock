@@ -6,8 +6,10 @@
   export let dayNumber: number;
   export let weekday: number;
   export let weeknumber: number;
-  export let date: Date;
+  export let year: number;
+  export let month: number;
 
+  $: date = new Date(year, month, dayNumber);
   $: today = date.asDay().getTime() === Date.today().getTime();
   $: shift = Calendar.getShiftForDay(date);
 </script>

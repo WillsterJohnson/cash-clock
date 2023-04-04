@@ -28,7 +28,11 @@
       ? 31
       : 30;
 
-  $: dayOfWeekFirstOfMonth = new Date(year, +month - 1, 1).getDay();
+  $: dayOfWeekFirstOfMonth = (() => {
+    const dayNum = new Date(year, +month - 1, 1).getDay();
+    return dayNum === 0 ? 7 : dayNum;
+  })();
+  $: console.log(dayOfWeekFirstOfMonth);
   $: isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
   $: monthLength = daysInMonth(+month);
 </script>
@@ -38,33 +42,30 @@
     <div class="day-label {day.toLowerCase()}">{day}</div>
   {/each}
 
+  <!-- daysInMonth(+month - 1) -  -->
   {#each Array.from({ length: dayOfWeekFirstOfMonth - 1 }) as _, i}
     <Day
       empty
-      dayNumber={daysInMonth(+month - 2) - i}
+      dayNumber={daysInMonth(+month - 1) - (dayOfWeekFirstOfMonth - (i + 2))}
       weekday={i}
       weeknumber={0}
-      date={new Date(year, +month - 2, daysInMonth(+month - 1) - (dayOfWeekFirstOfMonth - 2 - i))}
+      {year}
+      month={+month - 1}
     />
   {/each}
 
   {#each Array.from({ length: monthLength }) as _, i}
     <Day
       dayNumber={i + 1}
-      weekday={(i + (dayOfWeekFirstOfMonth - 1)) % 7}
+      weekday={((i + (dayOfWeekFirstOfMonth - 1)) % 7) + 1}
       weeknumber={Math.floor((i + (dayOfWeekFirstOfMonth - 1)) / 7)}
-      date={new Date(year, +month - 1, i + 1)}
+      {year}
+      month={+month}
     />
   {/each}
 
   {#each Array.from({ length: 6 - ((dayOfWeekFirstOfMonth - 1 + monthLength - 1) % 7) }) as _, i}
-    <Day
-      empty
-      dayNumber={i + 1}
-      weekday={i + 1}
-      weeknumber={5}
-      date={new Date(year, +month - 1, monthLength + i + 1)}
-    />
+    <Day empty dayNumber={i + 1} weekday={i + 1} weeknumber={5} {year} month={+month + 1} />
   {/each}
 </div>
 
