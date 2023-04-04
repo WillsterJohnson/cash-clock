@@ -1,19 +1,32 @@
 {
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/web-manifest.json",
   "short_name": "Cash Clock",
   "name": "Cash Clock",
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "/icon.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "256x256"
+    },
+    {
+      "src": "/icon-maskable.png",
+      "type": "image/png",
+      "sizes": "256x256",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-monochrome.png",
+      "type": "image/png",
+      "sizes": "256x256",
+      "purpose": "monochrome"
     }
   ],
   "id": "/?source=pwa",
   "start_url": "/?source=pwa",
-  "background_color": "#cc0066",
-  "display": "standalone",
+  "background_color": "#888888",
+  "theme_color": "#888888",
+  "display": "fullscreen",
   "scope": "/",
-  "theme_color": "#cc0066",
   "shortcuts": [],
   "description": "A clock to track your earnings in real time - because that's what *really* matters.",
   "screenshots": []
