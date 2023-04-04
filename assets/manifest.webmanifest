@@ -4,9 +4,10 @@
   "name": "Cash Clock",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/favicon.svg",
       "type": "image/png",
-      "sizes": "256x256"
+      "sizes": "any",
+      "purpose": "monochrome maskable"
     }
   ],
   "id": "/?source=pwa",

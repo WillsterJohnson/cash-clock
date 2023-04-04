@@ -1,0 +1,8 @@
+<!DOCTYPE svg>
+<svg version="1.1"
+  width="1000" height="1000"
+  xmlns="http://www.w3.org/2000/svg">
+
+  <text x="130" y="600" font-size="250" fill="white" font-family="sans-serif">
+    $£:€₹</text>
+</svg>
