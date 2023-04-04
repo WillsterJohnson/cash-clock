@@ -7,18 +7,6 @@
       "src": "/icon.png",
       "type": "image/png",
       "sizes": "256x256"
-    },
-    {
-      "src": "/icon-maskable.png",
-      "type": "image/png",
-      "sizes": "256x256",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icon-monochrome.png",
-      "type": "image/png",
-      "sizes": "256x256",
-      "purpose": "monochrome"
     }
   ],
   "id": "/?source=pwa",
