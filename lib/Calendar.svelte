@@ -38,26 +38,26 @@
     <div class="day-label {day.toLowerCase()}">{day}</div>
   {/each}
 
-  {#each Array.from({ length: dayOfWeekFirstOfMonth }) as _, i}
+  {#each Array.from({ length: dayOfWeekFirstOfMonth - 1 }) as _, i}
     <Day
       empty
-      dayNumber={daysInMonth(+month - 1) - (dayOfWeekFirstOfMonth - i)}
+      dayNumber={daysInMonth(+month - 2) - i}
       weekday={i}
       weeknumber={0}
-      date={new Date(year, +month - 1, daysInMonth(+month - 1) - (dayOfWeekFirstOfMonth - i))}
+      date={new Date(year, +month - 2, daysInMonth(+month - 1) - (dayOfWeekFirstOfMonth - 2 - i))}
     />
   {/each}
 
   {#each Array.from({ length: monthLength }) as _, i}
     <Day
       dayNumber={i + 1}
-      weekday={(i + dayOfWeekFirstOfMonth) % 7}
-      weeknumber={Math.floor((i + dayOfWeekFirstOfMonth) / 7)}
+      weekday={(i + (dayOfWeekFirstOfMonth - 1)) % 7}
+      weeknumber={Math.floor((i + (dayOfWeekFirstOfMonth - 1)) / 7)}
       date={new Date(year, +month - 1, i + 1)}
     />
   {/each}
 
-  {#each Array.from({ length: 6 - ((dayOfWeekFirstOfMonth + monthLength - 1) % 7) }) as _, i}
+  {#each Array.from({ length: 6 - ((dayOfWeekFirstOfMonth - 1 + monthLength - 1) % 7) }) as _, i}
     <Day
       empty
       dayNumber={i + 1}
