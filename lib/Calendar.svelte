@@ -50,6 +50,7 @@
 
   {#each Array.from({ length: monthLength }) as _, i}
     <Day
+      today={i + 1 === new Date().getDate()}
       dayNumber={i + 1}
       weekday={(i + dayOfWeekFirstOfMonth) % 7}
       weeknumber={Math.floor((i + dayOfWeekFirstOfMonth) / 7)}

@@ -3,6 +3,7 @@
   import ShiftInfo from "./ShiftInfo.svelte";
 
   export let empty: boolean = false;
+  export let today: boolean = false;
   export let dayNumber: number;
   export let weekday: number;
   export let weeknumber: number;
@@ -17,7 +18,7 @@
     <ShiftInfo info={shift} />
   </div>
 {:else}
-  <button class="day" data-weekday={weekday} data-weeknumber={weeknumber}>
+  <button class="day" class:today data-weekday={weekday} data-weeknumber={weeknumber}>
     <span>{dayNumber}</span>
     <ShiftInfo info={shift} />
   </button>
@@ -39,6 +40,7 @@
       border-left: 1px solid var(--foreground-elevated);
     }
     &:is(button) {
+      background: var(--background-elevated-50);
       appearance: none;
       background: none;
       cursor: pointer;
@@ -49,8 +51,14 @@
       &:not([data-weekday="0"]) {
         border-left: 1px solid var(--foreground-elevated);
       }
-      &:hover {
+      &:is(:hover, :focus-within) {
         background: var(--background-elevated);
+      }
+      &.today {
+        background: var(--background-elevated);
+        &:is(:hover, :focus-within) {
+          background: var(--background-elevated-50);
+        }
       }
     }
   }
