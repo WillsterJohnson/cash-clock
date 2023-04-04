@@ -21,9 +21,6 @@
 
   const parseAngle = (ratio: number) => (360 - (ratio * 360 + 180)) % 360;
 
-  const setRootHue = (hue = parseAngle(Date.now() / Date.minuteMillis)) =>
-    document.documentElement.style.setProperty("--hue", `${Math.abs(hue) % 360}`);
-
   let earnings = Calendar.earningsNow();
   $: procEarnings = earnings instanceof Error ? 0 : earnings;
 
@@ -35,7 +32,6 @@
   $: hours = (~~(time / Date.hourSeconds) % Date.dayHours) /*adjust for zero-index*/ + 1;
 
   const fastInterval = autoRepeat(() => {
-    setRootHue();
     seconds = (getTimeMillis() / 1000) % Date.minuteSeconds;
   }, 75);
   fastInterval.run();
@@ -43,7 +39,7 @@
   const midInterval = setInterval(() => {
     time = getTimeSeconds();
     earnings = Calendar.earningsNow();
-  }, 500);
+  }, /* 500 */ 10_000);
   const slowInterval = setInterval(() => {
     currency = Calendar.currency;
   }, 1000);
@@ -52,7 +48,6 @@
     fastInterval.active = false;
     clearInterval(midInterval);
     clearInterval(slowInterval);
-    setRootHue(330);
   });
 </script>
 
@@ -60,16 +55,16 @@
   {#each Array(12) as _}
     <div class="majorhour" />
   {/each}
-  <div style="--rotation:{parseAngle(hours / 12)}deg" class="hours" />
-  <div style="--rotation:{parseAngle(minutes / 60)}deg" class="minutes" />
-  <div style="--rotation:{parseAngle(seconds / 60)}deg" class="seconds" />
-  <div class="center" />
+  <div style="/*display:none;*/--rotation:{parseAngle(hours / 12)}deg" class="hours" />
+  <div style="/*display:none;*/--rotation:{parseAngle(minutes / 60)}deg" class="minutes" />
+  <div style="/*display:none;*/--rotation:{parseAngle(seconds / 60)}deg" class="seconds" />
+  <div class="center" style="/*display:none;*/" />
   <div class="digital">
     <span>{hours.toString().padStart(2, "0")}</span>
     <span>{minutes.toString().padStart(2, "0")}</span>
   </div>
 </div>
-<div class="pay">
+<div style="display:none" class="pay">
   <span class="currency">{currency}</span>
   <span class="count">
     <span class="whole">
@@ -85,15 +80,9 @@
   @use "sass:math";
 
   .clockface {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90vmin;
-    aspect-ratio: 1;
     border-radius: 90vmin;
     background: var(--background-elevated);
-    overflow: hidden;
+    height: 100%;
 
     .majorhour,
     .hours,
@@ -106,6 +95,7 @@
       height: var(--y-size);
       left: calc((90vmin - var(--x-size)) / 2);
       top: calc((90vmin - var(--y-size)) / 2);
+      z-index: 100;
     }
     .majorhour {
       --x-size: 0.2vmin;
@@ -135,7 +125,7 @@
     .hours {
       --x-size: 26vmin;
       --y-size: 5vmin;
-      background: var(--foreground);
+      background: var(--colorful-elevated);
     }
     .minutes {
       --x-size: 39vmin;
@@ -164,7 +154,6 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      z-index: -1;
       span {
         padding-inline: 1vmin;
         background: var(--background);
@@ -192,6 +181,7 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    z-index: 100;
     .currency {
       font-size: 6vmin;
     }
