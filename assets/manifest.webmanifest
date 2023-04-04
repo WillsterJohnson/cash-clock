@@ -7,7 +7,7 @@
       "src": "/favicon.svg",
       "type": "image/png",
       "sizes": "any",
-      "purpose": "monochrome maskable"
+      "purpose": "monochrome any"
     }
   ],
   "id": "/?source=pwa",

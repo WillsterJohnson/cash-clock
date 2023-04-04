@@ -3,6 +3,13 @@
   width="1000" height="1000"
   xmlns="http://www.w3.org/2000/svg">
 
-  <text x="130" y="600" font-size="250" fill="white" font-family="sans-serif">
-    $£:€₹</text>
+  <!--
+    text: "$£:€₹"
+    center aligned in x and y axes
+    font size 250px
+    sans-serif font
+    fill white
+   -->
+  <text x="50%" y="50%" text-anchor="middle" alignment-baseline="middle" font-size="250"
+    font-family="sans-serif" fill="white">$£:€₹</text>
 </svg>
