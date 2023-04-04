@@ -15,12 +15,23 @@
 </script>
 
 {#if empty}
-  <div class="day" data-weekday={weekday} data-weeknumber={weeknumber}>
+  <div
+    class="day"
+    data-weekday={weekday}
+    data-weeknumber={weeknumber}
+    data-date={date.toDateString()}
+  >
     <span>{dayNumber}</span>
     <ShiftInfo info={shift} />
   </div>
 {:else}
-  <button class="day" class:today data-weekday={weekday} data-weeknumber={weeknumber}>
+  <button
+    class="day"
+    class:today
+    data-weekday={weekday}
+    data-weeknumber={weeknumber}
+    data-date={date.toDateString()}
+  >
     <span>{dayNumber}</span>
     <ShiftInfo info={shift} />
   </button>
