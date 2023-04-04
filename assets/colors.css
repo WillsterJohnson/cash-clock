@@ -1,40 +1,50 @@
 :root {
   --hue: 330;
-  --colorful: lch(50% 90 var(--hue));
-  --colorful-50: lch(50% 90 var(--hue) / 0.5);
 }
 @media (prefers-color-scheme: light) {
   :root {
     --background: lch(90% 30 var(--hue));
     --background-dropped: lch(95% 30 var(--hue));
     --background-elevated: lch(80% 30 var(--hue));
-    --foreground: lch(10% 30 var(--hue));
-    --foreground-dropped: lch(25% 30 var(--hue));
-    --foreground-elevated: lch(5% 30 var(--hue));
+    --foreground: lch(15% 50 var(--hue));
+    --foreground-dropped: lch(30% 50 var(--hue));
+    --foreground-elevated: lch(10% 50 var(--hue));
+    --colorful: lch(50% 90 var(--hue));
+    --colorful-dropped: lch(70% 90 var(--hue));
+    --colorful-elevated: lch(30% 90 var(--hue));
 
     --background-50: lch(90% 30 var(--hue) / 0.5);
     --background-dropped-50: lch(95% 30 var(--hue) / 0.5);
-    --background-elevated-50: lch(30% 30 var(--hue) / 0.5);
-    --foreground-50: lch(10% 30 var(--hue) / 0.5);
-    --foreground-dropped-50: lch(25% 30 var(--hue) / 0.5);
-    --foreground-elevated-50: lch(5% 30 var(--hue) / 0.5);
+    --background-elevated-50: lch(80% 30 var(--hue) / 0.5);
+    --foreground-50: lch(15% 50 var(--hue) / 0.5);
+    --foreground-dropped-50: lch(30% 50 var(--hue) / 0.5);
+    --foreground-elevated-50: lch(10% 50 var(--hue) / 0.5);
+    --colorful-50: lch(50% 90 var(--hue) / 0.5);
+    --colorful-dropped-50: lch(70% 90 var(--hue) / 0.5);
+    --colorful-elevated-50: lch(30% 90 var(--hue) / 0.5);
   }
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: lch(10% 30 var(--hue));
-    --background-dropped: lch(5% 30 var(--hue));
-    --background-elevated: lch(20% 30 var(--hue));
-    --foreground: lch(70% 30 var(--hue));
-    --foreground-dropped: lch(55% 30 var(--hue));
-    --foreground-elevated: lch(99% 30 var(--hue));
+    --background: lch(10% 60 var(--hue));
+    --background-dropped: lch(5% 60 var(--hue));
+    --background-elevated: lch(20% 60 var(--hue));
+    --foreground: lch(70% 40 var(--hue));
+    --foreground-dropped: lch(55% 40 var(--hue));
+    --foreground-elevated: lch(99% 40 var(--hue));
+    --colorful: lch(50% 90 var(--hue));
+    --colorful-dropped: lch(30% 90 var(--hue));
+    --colorful-elevated: lch(80% 90 var(--hue));
 
-    --background-50: lch(10% 30 var(--hue) / 0.5);
-    --background-dropped-50: lch(5% 30 var(--hue) / 0.5);
-    --background-elevated-50: lch(20% 30 var(--hue) / 0.5);
-    --foreground-50: lch(70% 30 var(--hue) / 0.5);
-    --foreground-dropped-50: lch(55% 30 var(--hue) / 0.5);
-    --foreground-elevated-50: lch(99% 30 var(--hue) / 0.5);
+    --background-50: lch(10% 60 var(--hue) / 0.5);
+    --background-dropped-50: lch(5% 60 var(--hue) / 0.5);
+    --background-elevated-50: lch(20% 60 var(--hue) / 0.5);
+    --foreground-50: lch(70% 40 var(--hue) / 0.5);
+    --foreground-dropped-50: lch(55% 40 var(--hue) / 0.5);
+    --foreground-elevated-50: lch(99% 40 var(--hue) / 0.5);
+    --colorful-50: lch(50% 90 var(--hue) / 0.5);
+    --colorful-dropped-50: lch(30% 90 var(--hue) / 0.5);
+    --colorful-elevated-50: lch(80% 90 var(--hue) / 0.5);
   }
 }
 body {
