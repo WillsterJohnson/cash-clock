@@ -95,17 +95,13 @@
     padding: 1vmin;
     height: 10vmin;
     border-bottom: var(--foreground) 1px solid;
-    background: var(--background-elevated-50);
+    background: var(--background-elevated);
     transition: 250ms ease;
     &:first-child {
       border-top-left-radius: 2vmin;
     }
     &:last-child {
       border-top-right-radius: 2vmin;
-    }
-    &:is(:hover, :focus-within) {
-      outline: none;
-      background: var(--background-elevated);
     }
   }
   input {

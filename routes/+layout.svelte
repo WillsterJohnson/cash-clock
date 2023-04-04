@@ -68,13 +68,8 @@
     color: var(--foreground);
     padding: 2vmin;
     border-radius: 100vmin;
-    background: var(--background-elevated-50);
-    transition: 250ms ease;
+    background: var(--background-elevated);
     cursor: pointer;
-    &:is(:hover, :focus-within) {
-      outline: none;
-      background: var(--background-elevated);
-    }
   }
   .settings-toggle {
     top: 7vmin;

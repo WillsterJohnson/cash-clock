@@ -67,12 +67,7 @@
     font-size: 5vmin;
     padding: 1vmin;
     border-radius: 2vmin;
-    background: var(--background-elevated-50);
-    transition: 250ms ease;
-    &:is(:hover, :focus-within) {
-      outline: none;
-      background: var(--background-elevated);
-    }
+    background: var(--background-elevated);
   }
   input,
   select {
