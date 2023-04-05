@@ -28,11 +28,20 @@ declare global {
   interface Number {
     toString(): `${number}`;
   }
+
   interface DateConstructor {
     /**
      * Returns today's date at 00:00:00.000
      */
     today(): Date;
+    /**
+     * Checks if two dates are the same, to the specified precision
+     */
+    equals(
+      date1: Date,
+      date2: Date,
+      precision?: "year" | "month" | "day" | "hour" | "minute" | "second" | "millis",
+    ): boolean;
     /**
      * Returns the current time
      */
@@ -51,14 +60,25 @@ declare global {
     minuteMillis: 60_000;
 
     secondMillis: 1_000;
+
+    EPOCH: Date;
   }
+
   interface String {
     /**
      * Throws an error if the string cannot be parsed as a date.
      */
     toDate(): Date;
   }
+
+  interface ObjectConstructor {
+    /**
+     * Returns true if the object is empty
+     */
+    isEmpty(obj: object): obj is Empty;
+  }
 }
+/* DATE */
 Date.prototype.asDay = function () {
   return new Date(this.getFullYear(), this.getMonth(), this.getDate());
 };
@@ -74,8 +94,33 @@ Date.prototype.yesterday = function () {
 Date.prototype.isAfter = function (date: Date) {
   return this.getTime() > date.getTime();
 };
+/* DATE CONSTRUCTOR */
 Date.today = function () {
   return Date.currentTime.asDay();
+};
+Date.equals = function (
+  date1: Date,
+  date2: Date,
+  precision: "year" | "month" | "day" | "hour" | "minute" | "second" | "millis" = "millis",
+) {
+  switch (precision) {
+    case "year":
+      return date1.getFullYear() === date2.getFullYear();
+    case "month":
+      return Date.equals(date1, date2, "year") && date1.getMonth() === date2.getMonth();
+    case "day":
+      return Date.equals(date1, date2, "month") && date1.getDate() === date2.getDate();
+    case "hour":
+      return Date.equals(date1, date2, "day") && date1.getHours() === date2.getHours();
+    case "minute":
+      return Date.equals(date1, date2, "hour") && date1.getMinutes() === date2.getMinutes();
+    case "second":
+      return Date.equals(date1, date2, "minute") && date1.getSeconds() === date2.getSeconds();
+    case "millis":
+      return (
+        Date.equals(date1, date2, "second") && date1.getMilliseconds() === date2.getMilliseconds()
+      );
+  }
 };
 Object.defineProperty(Date, "currentTime", {
   get: () => {
@@ -175,12 +220,18 @@ Date.hourMillis = 3_600_000;
 Date.minuteSeconds = 60;
 Date.minuteMillis = 60_000;
 Date.secondMillis = 1_000;
+Date.EPOCH = new Date(0);
+/* STRING */
 String.prototype.toDate = function () {
   const date = new Date(`${this}`);
   if (isNaN(date.getTime())) throw new Error(`Invalid date: ${this}`);
   return date;
 };
-
+/* OBJECT */
+Object.isEmpty = function (obj: object): obj is Empty {
+  return Object.keys(obj).length === 0;
+};
+export type Empty = { [key: string]: never };
 // CALENDAR DATA
 const HOURS = [
   "00",
@@ -219,8 +270,8 @@ export interface Break {
   end: TimeStamp;
 }
 export interface Shift {
-  start: TimeStamp | null;
-  end: TimeStamp | null;
+  start: TimeStamp;
+  end: TimeStamp;
   scheduledUnpaid: Break[];
 }
 export const enum OverrideType {
@@ -232,17 +283,16 @@ export interface DayData<DateForm extends Date | string = Date> extends Shift {
   overridePay?: [number, OverrideType];
 }
 export type PatternDays = [
-  Shift | null,
-  Shift | null,
-  Shift | null,
-  Shift | null,
-  Shift | null,
-  Shift | null,
-  Shift | null,
+  Shift | Empty,
+  Shift | Empty,
+  Shift | Empty,
+  Shift | Empty,
+  Shift | Empty,
+  Shift | Empty,
+  Shift | Empty,
 ][];
 export interface ShiftPattern<DateForm extends Date | string = Date> {
   pattern: PatternDays;
-  oneOffs: DayData<DateForm>[];
   startDates: DateForm[];
 }
 export interface Currency {
@@ -252,8 +302,9 @@ export interface Currency {
 export interface CalendarData<DateForm extends Date | string = Date> {
   currency: Currency;
   hourlyPay: number;
-  days: DayData<DateForm>[] | ShiftPattern<DateForm>;
-  alreadyWorked: Record<number, Shift>;
+  shiftPattern: ShiftPattern<DateForm>;
+  oneOffs: DayData<DateForm>[];
+  alreadyWorked: Record<number, Shift | Empty>;
 }
 
 class CalendarClass {
@@ -265,15 +316,55 @@ class CalendarClass {
   private storedData: CalendarData;
 
   // LOADING
+  private validate(
+    data: Partial<CalendarData<string | Date>>,
+  ): data is CalendarData<string | Date> {
+    if (Object.isEmpty(data)) throw new Error("No data to validate");
+
+    if (!data.currency) throw new Error("No currency");
+    if (typeof data.currency !== "object") throw new Error("Invalid currency");
+    if (!data.currency.symbol) throw new Error("No currency symbol");
+    if (!["$", "£", "€", "¥", "₹"].includes(data.currency.symbol))
+      throw new Error("Invalid currency symbol");
+    if (!data.currency.precision) throw new Error("No currency precision");
+    if (typeof data.currency.precision !== "number") throw new Error("Invalid currency precision");
+
+    if (!data.hourlyPay) throw new Error("No hourly pay");
+    if (typeof data.hourlyPay !== "number") throw new Error("Invalid hourly pay");
+
+    if (!data.shiftPattern) throw new Error("No shift pattern");
+    if (typeof data.shiftPattern !== "object") throw new Error("Invalid shift pattern");
+    if (!data.shiftPattern.pattern) throw new Error("No shift pattern pattern");
+    if (!Array.isArray(data.shiftPattern.pattern)) throw new Error("Invalid shift pattern pattern");
+    if (!data.shiftPattern.startDates) throw new Error("No shift pattern start dates");
+    if (!Array.isArray(data.shiftPattern.startDates))
+      throw new Error("Invalid shift pattern start dates");
+
+    if (!data.oneOffs) throw new Error("No one offs");
+    if (!Array.isArray(data.oneOffs)) throw new Error("Invalid one offs");
+
+    if (!data.alreadyWorked) throw new Error("No already worked");
+    if (typeof data.alreadyWorked !== "object") throw new Error("Invalid already worked");
+
+    return true;
+  }
+
   private load() {
-    const parsed = JSON.parse(localStorage.getItem("calendar") || "{}") as CalendarData<string>;
-    if (!Object.keys(parsed).length)
-      return {
+    let parsed = JSON.parse(localStorage.getItem("calendar") || "{}") as CalendarData<string>;
+    try {
+      this.validate(parsed);
+    } catch {
+      parsed = {
         currency: { symbol: "£", precision: 2 },
-        hourlyPay: NaN,
-        days: [],
+        hourlyPay: 10,
         alreadyWorked: [],
-      } as CalendarData;
+        oneOffs: [],
+        shiftPattern: {
+          pattern: [[{}, {}, {}, {}, {}, {}, {}]],
+          startDates: [Date.today().toString()],
+        },
+      };
+    }
     this.withoutSaving(() => this.loadtimeUpdates(parsed));
     return parsed as unknown as CalendarData;
   }
@@ -281,46 +372,36 @@ class CalendarClass {
   private loadtimeUpdates(calendarData: CalendarData<string>) {
     this.parseDates(calendarData);
     const parsed = calendarData as unknown as CalendarData;
-    this.updateShiftPattern(parsed);
     this.archiveWorkedDays(parsed);
+    this.updateShiftPattern(parsed);
   }
 
   private parseDates(parsed: CalendarData<string>) {
-    // @ts-expect-error - expect day.date to not be a Date; we are converting
-    if (Array.isArray(parsed.days)) parsed.days.forEach((day) => (day.date = day.date.toDate()));
-    // @ts-expect-error - expect day.startDates to not be a Date; we are converting
-    else parsed.days.startDates = parsed.days.startDates.map((date) => date.toDate());
+    // @ts-expect-error - unsafe date conversion
+    parsed.shiftPattern.startDates = parsed.shiftPattern.startDates.map((date) => date.toDate());
+    parsed.oneOffs = parsed.oneOffs.map((day) => {
+      // @ts-expect-error - unsafe date conversion
+      day.date = day.date.toDate();
+      return day;
+    });
   }
 
   private updateShiftPattern(parsed: CalendarData) {
-    if (Array.isArray(parsed.days)) return;
-    const { pattern, startDates } = parsed.days;
-    const filtered = startDates.filter((date) => Date.today().isAfter(date));
+    const { pattern, startDates } = parsed.shiftPattern;
+    const filtered = startDates.filter(
+      (date) => Date.today().isAfter(date) || Date.equals(Date.today(), date, "day"),
+    );
     const startDate = filtered[filtered.length - 1];
-    parsed.days = this.createShiftPatternDays(pattern, startDate);
+    parsed.shiftPattern = this.createShiftPatternDays(pattern, startDate);
   }
 
   private archiveWorkedDays(parsed: CalendarData) {
-    if (Array.isArray(parsed.days)) {
-      const unworked = parsed.days.filter((day) => {
-        const worked = Date.today().isAfter(day.date.asDay());
-        if (worked) parsed.alreadyWorked[day.date.getTime()] = day;
-        return !worked;
-      });
-      parsed.days = unworked;
-    } else {
-      const mostRecent = new Date(Math.max(...Object.keys(parsed.alreadyWorked).map(Number)));
-      let lastDayChecked = mostRecent.asDay();
-      while (Date.today().isAfter(lastDayChecked)) {
-        const dayInfo = this.getShiftForDay(lastDayChecked, parsed.days);
-        const oneOff = parsed.days.oneOffs.find((day) => day.date.asDay() === lastDayChecked);
-
-        const key = lastDayChecked.getTime();
-
-        if (oneOff) parsed.alreadyWorked[key] = oneOff;
-        else if (dayInfo && !(dayInfo instanceof Error)) parsed.alreadyWorked[key] = dayInfo;
-        else parsed.alreadyWorked[key] = { start: null, end: null, scheduledUnpaid: [] };
-      }
+    const mostRecent = new Date(Math.max(...Object.keys(parsed.alreadyWorked).map(Number)));
+    let lastDayChecked = mostRecent.asDay();
+    while (Date.today().isAfter(lastDayChecked)) {
+      const shift = this.getShiftForDay(lastDayChecked, parsed);
+      parsed.alreadyWorked[lastDayChecked.getTime()] = shift;
+      lastDayChecked = lastDayChecked.tomorrow();
     }
   }
 
@@ -350,52 +431,46 @@ class CalendarClass {
     // create a year's worth of week Zero day zero dates
     while (startDates.length < 52 / pattern.length)
       startDates.push(startDates[startDates.length - 1].offsetDays(7 * pattern.length));
-    return { pattern, startDates, oneOffs: [] };
+    return { pattern, startDates };
   }
   // PUBLIC API
-  public getShiftForDay(day: Date, useShiftPattern?: ShiftPattern) {
-    const shiftPattern = useShiftPattern ?? this.storedData.days;
-    if (Array.isArray(shiftPattern)) {
-      return shiftPattern.find((cur) => cur.date.asDay() === day) ?? null;
-    }
+  public getShiftForDay(day: Date, altCalendarData?: CalendarData): DayData | Shift | Empty {
+    const alreadyWorked = (altCalendarData ?? this.storedData).alreadyWorked[day.asDay().getTime()];
+    if (alreadyWorked) return alreadyWorked;
+    const oneOff = (altCalendarData ?? this.storedData).oneOffs.find((cur) =>
+      Date.equals(cur.date, day, "day"),
+    );
+    if (oneOff) return oneOff;
+    const shiftPattern = (altCalendarData ?? this.storedData).shiftPattern;
     const { pattern, startDates } = shiftPattern;
     const weekZero = startDates
-      .filter((sDay) => day.isAfter(sDay) || day.asDay().getTime() === sDay.asDay().getTime())
-      .reduce<Date>((max, cur) => (max.isAfter(cur) ? max : cur), new Date(0, 0, 1));
+      .filter((sDay) => day.isAfter(sDay) || Date.equals(day, sDay, "day"))
+      .reduce<Date>((max, cur) => (max.isAfter(cur) ? max : cur), Date.EPOCH);
+    if (Date.equals(weekZero, Date.EPOCH)) return {};
     const dayOffset = (day.getTime() - weekZero.getTime()) / Date.dayMillis;
-    return pattern[~~(dayOffset / 7)]?.[~~(dayOffset % 7)];
+    return pattern[~~(dayOffset / 7)][~~(dayOffset % 7)];
   }
 
   public setShiftPattern(pattern: PatternDays, startDate: Date) {
-    this.storedData.days = this.createShiftPatternDays(pattern, startDate);
+    this.storedData.shiftPattern = this.createShiftPatternDays(pattern, startDate);
     this.save();
   }
 
-  public appendDay(day: DayData) {
-    if (!Array.isArray(this.storedData.days))
-      return {
-        confirm: () => {
-          this.storedData.days = [];
-          this.appendDay(day);
-        },
-      };
-
-    this.storedData.days.push(day);
+  public appendOneOff(day: DayData) {
+    this.storedData.oneOffs.push(day);
     this.save();
-  }
-
-  public appendOneOff(oneOff: DayData) {
-    if (Array.isArray(this.storedData.days)) throw new Error("Cannot add one-off to non-pattern");
-    this.storedData.days.oneOffs.push(oneOff);
   }
 
   public earningsNow() {
-    const { hourlyPay } = this.storedData;
-    if (isNaN(hourlyPay)) return new Error("No hourly pay set");
+    let todaysShift = this.getShiftForDay(Date.today());
+    if (Object.isEmpty(todaysShift)) return new Error("No shift for today");
 
-    let todaysShift = this.getShiftForDay(Date.today())!;
-    if (!todaysShift || todaysShift instanceof Error)
-      return new Error("No shift for today", { cause: todaysShift });
+    const hourlyPay =
+      "overridePay" in todaysShift && todaysShift.overridePay !== undefined
+        ? todaysShift.overridePay[1] === OverrideType.hourlyPay
+          ? todaysShift.overridePay[0]
+          : todaysShift.overridePay[0] * this.storedData.hourlyPay
+        : this.storedData.hourlyPay;
 
     const { start, end, scheduledUnpaid } = todaysShift;
     if (!start || !end) return new Error("No shift times for today");

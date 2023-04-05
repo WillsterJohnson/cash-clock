@@ -14,7 +14,7 @@
     },
     calendar: {
       sr: "Change to clock view",
-      icon: "schedule",
+      icon: "timer",
       navigate: "/clock",
     },
   } as const;

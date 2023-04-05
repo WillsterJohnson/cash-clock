@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { Shift } from "$lib/calendar.js";
+  import type { Empty, Shift } from "$lib/calendar.js";
 
-  export let info: Shift | null;
+  export let info: Shift | Empty;
 </script>
 
-{#if info}
+{#if !Object.isEmpty(info)}
   <div>
     <span>{info.start}</span>
     <span>{info.end}</span>

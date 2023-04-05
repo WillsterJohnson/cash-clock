@@ -1,20 +1,7 @@
 <script lang="ts">
   import { autoRepeat } from "$lib/autoRepeat.js";
-  import { Calendar, type Shift } from "$lib/calendar.js";
+  import { Calendar } from "$lib/calendar.js";
   import { onDestroy } from "svelte";
-
-  const hour12 = {
-    start: "07:45",
-    end: "17:45",
-    scheduledUnpaid: [
-      {
-        start: "13:00",
-        end: "14:00",
-      },
-    ],
-  } as Shift;
-  Calendar.hourlyPay = 10.5;
-  Calendar.setShiftPattern([[hour12, hour12, hour12, hour12, hour12, hour12, hour12]], new Date());
 
   const getTimeSeconds = () => ~~(Date.currentTime.getTime() / 1000) % Date.daySeconds;
   const getTimeMillis = () => Date.currentTime.getTime() % Date.dayMillis;
@@ -22,7 +9,7 @@
   const parseAngle = (ratio: number) => (360 - (ratio * 360 + 180)) % 360;
 
   let earnings = Calendar.earningsNow();
-  $: procEarnings = earnings instanceof Error ? 0 : earnings;
+  $: procEarnings = earnings instanceof Error ? NaN : earnings;
 
   let currency = Calendar.currency;
 
@@ -65,16 +52,20 @@
       <span>{minutes.toString().padStart(2, "0")}</span>
     </div>
   </div>
-  <div class="pay">
-    <span class="currency">{currency}</span>
-    <span class="count">
-      <span class="whole">
-        {procEarnings.toFixed(0)}
+  <div class="pay" class:active={!isNaN(procEarnings)}>
+    {#if isNaN(procEarnings)}
+      <span class="icon">timer_off</span>
+    {:else}
+      <span class="currency">{currency}</span>
+      <span class="count">
+        <span class="whole">
+          {procEarnings.toFixed(0)}
+        </span>
+        <span class="fraction">
+          {procEarnings.toFixed(Calendar.currencyPrecision).split(".")[1] ?? ""}
+        </span>
       </span>
-      <span class="fraction">
-        {procEarnings.toFixed(Calendar.currencyPrecision).split(".")[1] ?? ""}
-      </span>
-    </span>
+    {/if}
   </div>
 </div>
 
@@ -179,17 +170,20 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(1.8);
-    padding-block-start: 1.5vmin;
-    padding-block-end: 1.75vmin;
-    padding-inline: 2.5vmin;
     background: var(--background-dropped-50);
     border-radius: 100vmin;
     overflow: hidden;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
     z-index: 100;
+    padding: 1vmin;
+    &.active {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      padding-block-start: 1.5vmin;
+      padding-block-end: 1.75vmin;
+      padding-inline: 2.5vmin;
+    }
     .currency {
       font-size: 6vmin;
     }
