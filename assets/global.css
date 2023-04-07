@@ -6,3 +6,79 @@
   height: 1px;
   overflow: hidden;
 }
+
+*::selection {
+  background: transparent;
+}
+
+*:is(:hover, :focus-within) {
+  outline: none;
+}
+
+:is(input, select, button, [data-button]) {
+  color: var(--foreground);
+  background: var(--background-elevated);
+}
+
+:is(input, select, button):is(:hover, :focus-within) {
+  color: var(--background-elevated);
+  background: var(--foreground-dropped);
+}
+
+[class*="flex-"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[class*="flex-"][class*="-col"] {
+  flex-direction: column;
+}
+
+[class*="flex-"][class*="-row"] {
+  flex-direction: row;
+}
+
+[class*="flex-"][class*="-wrap"] {
+  flex-wrap: wrap;
+}
+
+[class*="flex-"][class*="-nowrap"] {
+  flex-wrap: nowrap;
+}
+
+[class*="flex-"][class*="-ais"] {
+  align-items: start;
+}
+
+[class*="flex-"][class*="-aic"] {
+  align-items: center;
+}
+
+[class*="flex-"][class*="-aie"] {
+  align-items: end;
+}
+
+[class*="flex-"][class*="-jcs"] {
+  justify-content: start;
+}
+
+[class*="flex-"][class*="-jcc"] {
+  justify-content: center;
+}
+
+[class*="flex-"][class*="-jce"] {
+  justify-content: end;
+}
+
+[class*="flex-"][class*="-jcsb"] {
+  justify-content: space-between;
+}
+
+[class*="flex-"][class*="-jcsa"] {
+  justify-content: space-around;
+}
+
+[class*="flex-"][class*="-jcse"] {
+  justify-content: space-evenly;
+}

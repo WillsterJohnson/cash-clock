@@ -1,44 +1,70 @@
 <script lang="ts">
   import CalendarUI from "$lib/Calendar.svelte";
+  import { BreakReason, Calendar, type Shift } from "$lib/calendar.js";
+  import IconButton from "$lib/components/IconButton.svelte";
   let year = Date.currentTime.getFullYear();
-  let month: `${number}` = (Date.currentTime.getMonth() + 1).toString();
+  let month: number = Date.currentTime.getMonth();
 
+  const whatAWayToMakeALivin = {
+    start: "09:00",
+    end: "17:00",
+    scheduledUnpaid: [
+      {
+        start: "12:00",
+        end: "13:00",
+        reason: BreakReason.lunch,
+        id: crypto.randomUUID(),
+      },
+    ],
+  } as Shift;
+
+  const CEOShifts = {
+    start: "07:45",
+    end: "17:45",
+    scheduledUnpaid: [
+      {
+        start: "13:00",
+        end: "14:00",
+        reason: BreakReason.lunch,
+        id: crypto.randomUUID(),
+      },
+    ],
+  } as Shift;
+  Calendar.setShiftPattern(
+    [[CEOShifts, CEOShifts, CEOShifts, CEOShifts, CEOShifts, CEOShifts, CEOShifts]],
+    new Date(2023, 1, 27),
+  );
   const nextMonth = () => {
-    if (+month === 12) {
-      month = "1";
+    if (month === 11) {
+      month = 0;
       year++;
-    } else month = (+month + 1).toString();
+    } else month = month + 1;
   };
   const lastMonth = () => {
-    if (+month === 1) {
-      month = "12";
+    if (+month === 0) {
+      month = 11;
       year--;
-    } else month = (+month - 1).toString();
+    } else month = month - 1;
   };
 </script>
 
 <div class="calendar">
   <div class="options">
-    <button class="nav left" on:click={lastMonth} aria-label="Previous Month">
-      <span class="icon">navigate_before</span>
-    </button>
+    <div class="nav left">
+      <IconButton on:click={lastMonth} sr="Previous Month">navigate_before</IconButton>
+    </div>
 
     <div class="selector">
       <div class="month">
         <label for="month" data-sr-only>Month</label>
         <select name="month" bind:value={month}>
-          <option value="1">Jan</option>
-          <option value="2">Feb</option>
-          <option value="3">Mar</option>
-          <option value="4">Apr</option>
-          <option value="5">May</option>
-          <option value="6">Jun</option>
-          <option value="7">Jul</option>
-          <option value="8">Aug</option>
-          <option value="9">Sep</option>
-          <option value="10">Oct</option>
-          <option value="11">Nov</option>
-          <option value="12">Dec</option>
+          {#each Array(12) as _, i}
+            <option value={i}>
+              {new Date(0, i).toLocaleDateString("en-US", {
+                month: "short",
+              })}
+            </option>
+          {/each}
         </select>
       </div>
       <div class="year">
@@ -47,9 +73,9 @@
       </div>
     </div>
 
-    <button class="nav right" on:click={nextMonth} aria-label="Next Month">
-      <span class="icon">navigate_next</span>
-    </button>
+    <div class="nav right">
+      <IconButton on:click={nextMonth} sr="Next Month">navigate_next</IconButton>
+    </div>
   </div>
 </div>
 

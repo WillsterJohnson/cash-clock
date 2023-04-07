@@ -229,7 +229,7 @@ String.prototype.toDate = function () {
 };
 /* OBJECT */
 Object.isEmpty = function (obj: object): obj is Empty {
-  return Object.keys(obj).length === 0;
+  return Object.keys(obj ?? {}).length === 0;
 };
 export type Empty = { [key: string]: never };
 // CALENDAR DATA
@@ -264,10 +264,18 @@ export type Hour = (typeof HOURS)[number];
 const MINUTES = ["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"] as const;
 export type Minute = (typeof MINUTES)[number];
 export type TimeStamp = `${Hour}:${Minute}`;
+export const enum BreakReason {
+  lunch = "lunch",
+  tea = "tea",
+  doctors = "doctors",
+  dentist = "dentist",
+  other = "other",
+}
 export interface Break {
-  reason: string;
+  reason: BreakReason;
   start: TimeStamp;
   end: TimeStamp;
+  id: ReturnType<typeof crypto.randomUUID>;
 }
 export interface Shift {
   start: TimeStamp;
@@ -429,7 +437,7 @@ class CalendarClass {
       startDates.push(startDate.asDay().offsetDays(-7 * pattern.length));
     startDates.push(startDate.asDay());
     // create a year's worth of week Zero day zero dates
-    while (startDates.length < 52 / pattern.length)
+    while (startDates.length < 10 / pattern.length)
       startDates.push(startDates[startDates.length - 1].offsetDays(7 * pattern.length));
     return { pattern, startDates };
   }
@@ -448,7 +456,7 @@ class CalendarClass {
       .reduce<Date>((max, cur) => (max.isAfter(cur) ? max : cur), Date.EPOCH);
     if (Date.equals(weekZero, Date.EPOCH)) return {};
     const dayOffset = (day.getTime() - weekZero.getTime()) / Date.dayMillis;
-    return pattern[~~(dayOffset / 7)][~~(dayOffset % 7)];
+    return pattern?.[~~(dayOffset / 7)]?.[~~(dayOffset % 7)] ?? {};
   }
 
   public setShiftPattern(pattern: PatternDays, startDate: Date) {

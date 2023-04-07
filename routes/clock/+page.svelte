@@ -52,7 +52,7 @@
       <span>{minutes.toString().padStart(2, "0")}</span>
     </div>
   </div>
-  <div class="pay" class:active={!isNaN(procEarnings)}>
+  <div class="pay" class:no-shift={isNaN(procEarnings)}>
     {#if isNaN(procEarnings)}
       <span class="icon">timer_off</span>
     {:else}
@@ -174,15 +174,20 @@
     border-radius: 100vmin;
     overflow: hidden;
     z-index: 100;
-    padding: 1vmin;
-    &.active {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    &:not(.no-shift) {
+      padding: 1vmin;
       padding-block-start: 1.5vmin;
       padding-block-end: 1.75vmin;
       padding-inline: 2.5vmin;
+    }
+    &.no-shift {
+      width: 7vmin;
+      padding-inline-end: 0.25vmin;
+      aspect-ratio: 1/1;
     }
     .currency {
       font-size: 6vmin;

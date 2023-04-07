@@ -1,7 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { autoRepeat } from "$lib/autoRepeat.js";
+  import IconButton from "$lib/components/IconButton.svelte";
   import Settings from "$lib/Settings.svelte";
+  import { onDestroy } from "svelte";
   import { fade, slide } from "svelte/transition";
 
   export let data;
@@ -24,27 +25,38 @@
     data.pathname.startsWith("/clock") ? "clock" : "calendar"
   ) as keyof typeof clockCalendarOptions;
 
-  const setRootHue = () =>
-    document.documentElement.style.setProperty(
-      "--hue",
-      `${Math.abs(360 - ((Date.now() / Date.minuteMillis) * 360 + 180)) % 360}`,
-    );
+  const setRootHue = () => {
+    const docElementHue = +document.documentElement.style.getPropertyValue("--hue").split("deg")[0];
+    if (isNaN(docElementHue)) {
+      document.documentElement.style.setProperty("--hue", "0deg");
+      setRootHue();
+      return;
+    }
+    const newHue = (docElementHue + 2) % 360;
+    document.documentElement.style.setProperty("--hue", `${newHue}deg`);
+  };
 
-  const fastInterval = autoRepeat(setRootHue, 75);
-  fastInterval.run();
+  const interval = setInterval(setRootHue, 400);
+  onDestroy(() => clearInterval(interval));
 </script>
 
-<button class="settings-toggle" on:click={() => (settings = !settings)}>
-  <span class="icon">{settings ? "arrow_back" : "settings"}</span>
-</button>
+<div class="settings-toggle">
+  <IconButton
+    on:click={() => (settings = !settings)}
+    sr={settings ? "Close settings" : "Open settings"}
+  >
+    {settings ? "arrow_back" : "settings"}
+  </IconButton>
+</div>
 
-<button
-  class="clock-calendar-toggle"
-  on:click={() => goto(clockCalendarOptions[clockCalendar].navigate)}
->
-  <span data-sr-only>{clockCalendarOptions[clockCalendar].sr}</span>
-  <span class="icon">{clockCalendarOptions[clockCalendar].icon}</span>
-</button>
+<div class="clock-calendar-toggle">
+  <IconButton
+    on:click={() => goto(clockCalendarOptions[clockCalendar].navigate)}
+    sr={clockCalendarOptions[clockCalendar].sr}
+  >
+    {clockCalendarOptions[clockCalendar].icon}
+  </IconButton>
+</div>
 
 <div class="settings-wrap">
   {#if settings}
@@ -78,20 +90,13 @@
   .settings-toggle,
   .clock-calendar-toggle {
     position: absolute;
-    border: none;
-    color: var(--foreground);
-    padding: 2vmin;
-    border-radius: 100vmin;
-    background: var(--background-elevated);
-    cursor: pointer;
+    top: 7vmin;
   }
   .settings-toggle {
-    top: 7vmin;
     left: 5vmin;
     z-index: 200;
   }
   .clock-calendar-toggle {
-    top: 7vmin;
     right: 5vmin;
     z-index: 100;
   }

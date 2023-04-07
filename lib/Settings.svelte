@@ -96,7 +96,6 @@
     height: 10vmin;
     border-bottom: var(--foreground) 1px solid;
     background: var(--background-elevated);
-    transition: 250ms ease;
     &:first-child {
       border-top-left-radius: 2vmin;
     }

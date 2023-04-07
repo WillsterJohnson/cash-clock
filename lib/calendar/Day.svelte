@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Calendar } from "$lib/calendar.js";
+  import ShiftEditor from "./ShiftEditor.svelte";
   import ShiftInfo from "./ShiftInfo.svelte";
 
   export let empty: boolean = false;
@@ -12,6 +13,8 @@
   $: weekday = date.getDay() === 0 ? 7 : date.getDay();
   $: today = date.asDay().getTime() === Date.today().getTime();
   $: shift = Calendar.getShiftForDay(date);
+
+  let open = false;
 </script>
 
 {#if empty}
@@ -31,10 +34,12 @@
     data-weekday={weekday}
     data-weeknumber={weeknumber}
     data-date={date.toDateString()}
+    on:click={() => (open = true)}
   >
     <span>{dayNumber}</span>
     <ShiftInfo info={shift} />
   </button>
+  <ShiftEditor {date} {shift} bind:open />
 {/if}
 
 <style lang="scss">
